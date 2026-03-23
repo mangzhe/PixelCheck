@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - Screen Test Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, "Microsoft Yahei", "Segoe UI", sans-serif; }
+        body { background: #f0f2f5; color: #1e293b; line-height: 1.5; }
+        header {
+            background: #ffffffdd; backdrop-filter: blur(8px); padding: 0.8rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .header-container {
+            max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+        .logo {
+            font-size: 1.4rem; font-weight: 700;
+            background: linear-gradient(135deg, #2563eb, #1e40af); -webkit-background-clip: text;
+            background-clip: text; color: transparent;
+        }
+        .nav-links {
+            display: flex; gap: 1.8rem; align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none; color: #334155; font-weight: 500; transition: 0.2s;
+            padding: 0.25rem 0;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #2563eb; border-bottom: 2px solid #2563eb; }
+        .lang-btn {
+            background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 40px;
+            padding: 0.25rem 0.8rem; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
+            margin-left: 1rem;
+        }
+        .lang-btn:hover { background: #e2e8f0; }
+        .page-container {
+            max-width: 1280px; margin: 2rem auto; padding: 0 1.5rem;
+        }
+        .tutorial-container {
+            background: #fff; border-radius: 28px; padding: 2rem;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+        }
+        .tutorial-step {
+            background: #f9fafb; border-radius: 20px; padding: 1.5rem;
+            margin-bottom: 1.5rem; border: 1px solid #eef2ff;
+        }
+        .tutorial-step h3 {
+            color: #0f172a; margin-bottom: 0.75rem;
+        }
+        .tutorial-step p, .tutorial-step ul {
+            color: #475569; line-height: 1.6;
+        }
+        .tutorial-step ul { margin-left: 1.5rem; margin-top: 0.5rem; }
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-container">
+        <div class="logo">🖥️ Screen Test Master</div>
+        <div class="nav-links">
+            <a id="navTool" href="index.html">Tool</a>
+            <a id="navTutorial" href="tutorial.html" class="active">Tutorial</a>
+            <a id="navFaq" href="faq.html">FAQ</a>
+            <a id="navChangelog" href="changelog.html">Changelog</a>
+            <button class="lang-btn" onclick="toggleLanguage()">中文</button>
+        </div>
+    </div>
+</header>
+
+<div class="page-container">
+    <div class="tutorial-container" id="tutorialContainer"></div>
+</div>
+
+<script>
+const lang = {
+    en: {
+        nav: { tool: "Tool", tutorial: "Tutorial", faq: "FAQ", changelog: "Changelog", langBtn: "中文" },
+        title: "📖 Screen Test Tool Tutorial",
+        steps: [
+            { title: "Step 1: Select Test Mode", content: "Click one of the three cards on the left to switch test modes. For a full check, follow the order: Dead Pixel → Brightness/Contrast → Resolution." },
+            { title: "Step 2: Fullscreen & Navigation", content: "Double-click the test screen or press the 'Fullscreen' button to enter fullscreen mode. While in fullscreen, <strong>click the left half to go to previous test pattern, right half to go to next pattern</strong>. You can also use the buttons in the toolbar." },
+            { title: "Step 3: Interpreting Results", content: "<ul><li><strong>Dead Pixel Test:</strong> Switch through colors; fixed bright/dark/colored pixels indicate defects. Uniform solid color means good screen.</li><li><strong>Brightness/Contrast Test:</strong> Check brightness uniformity and smooth transitions; banding or uneven areas indicate issues.</li><li><strong>Resolution Test:</strong> Grid lines must be straight; target center sharp; text edges crisp. Blur or distortion suggests scaling problems.</li></ul>" },
+            { title: "Step 4: Troubleshooting", content: "If defects found:<br>1. Minor dead pixels often acceptable; severe ones contact support.<br>2. Uneven brightness: adjust display settings, clean screen.<br>3. Resolution issues: restore default display resolution." }
+        ]
+    },
+    zh: {
+        nav: { tool: "专业检测", tutorial: "使用教程", faq: "常见问题", changelog: "版本日志", langBtn: "English" },
+        title: "📖 屏幕检测工具使用教程",
+        steps: [
+            { title: "步骤1：选择检测类型", content: "点击左侧三个卡片之一切换检测模式。如需全面检测，建议按“坏点→亮度→分辨率”的顺序操作。" },
+            { title: "步骤2：全屏与切换", content: "双击检测画面或点击“全屏检测”按钮进入全屏模式。全屏下，<strong>单击左半区切换到上一张测试图，右半区切换到下一张</strong>。也可使用工具栏按钮。" },
+            { title: "步骤3：结果解读", content: "<ul><li><strong>坏点检测：</strong>切换纯色，固定亮点/暗点/彩点为坏点；均匀纯色则正常。</li><li><strong>亮度/对比度：</strong>检查亮度均匀性和过渡平滑度，断层或不均表明问题。</li><li><strong>分辨率：</strong>网格线应笔直；标靶中心清晰；文字边缘锐利。模糊或变形表示分辨率适配异常。</li></ul>" },
+            { title: "步骤4：问题处理", content: "若发现问题：<br>1. 坏点轻微可接受，严重则联系售后。<br>2. 亮度不均：调整显示设置，清洁屏幕。<br>3. 分辨率异常：恢复系统默认分辨率。" }
+        ]
+    }
+};
+
+let currentLang = localStorage.getItem('lang') === 'zh' ? 'zh' : 'en';
+
+function applyLanguage() {
+    const l = lang[currentLang];
+    // 更新导航
+    document.getElementById('navTool').innerText = l.nav.tool;
+    document.getElementById('navTutorial').innerText = l.nav.tutorial;
+    document.getElementById('navFaq').innerText = l.nav.faq;
+    document.getElementById('navChangelog').innerText = l.nav.changelog;
+    document.querySelector('.lang-btn').innerText = l.nav.langBtn;
+    // 更新内容
+    let html = `<h2 style="margin-bottom: 1.5rem;">${l.title}</h2>`;
+    l.steps.forEach(step => {
+        html += `<div class="tutorial-step"><h3>${step.title}</h3><p>${step.content}</p></div>`;
+    });
+    document.getElementById('tutorialContainer').innerHTML = html;
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+}
+
+applyLanguage();
+</script>
+</body>
+</html>

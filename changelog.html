@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Screen Test Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, "Microsoft Yahei", "Segoe UI", sans-serif; }
+        body { background: #f0f2f5; color: #1e293b; line-height: 1.5; }
+        header {
+            background: #ffffffdd; backdrop-filter: blur(8px); padding: 0.8rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .header-container {
+            max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+        .logo {
+            font-size: 1.4rem; font-weight: 700;
+            background: linear-gradient(135deg, #2563eb, #1e40af); -webkit-background-clip: text;
+            background-clip: text; color: transparent;
+        }
+        .nav-links {
+            display: flex; gap: 1.8rem; align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none; color: #334155; font-weight: 500; transition: 0.2s;
+            padding: 0.25rem 0;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #2563eb; border-bottom: 2px solid #2563eb; }
+        .lang-btn {
+            background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 40px;
+            padding: 0.25rem 0.8rem; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
+            margin-left: 1rem;
+        }
+        .lang-btn:hover { background: #e2e8f0; }
+        .page-container {
+            max-width: 1280px; margin: 2rem auto; padding: 0 1.5rem;
+        }
+        .changelog-container {
+            background: #fff; border-radius: 28px; padding: 2rem;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+        }
+        .changelog-item {
+            background: #f9fafb; border-radius: 20px; padding: 1.5rem;
+            margin-bottom: 1.5rem; border: 1px solid #eef2ff;
+        }
+        .changelog-item h3 {
+            color: #0f172a; margin-bottom: 0.75rem;
+        }
+        .changelog-item ul {
+            margin-left: 1.5rem; margin-top: 0.5rem; color: #475569;
+        }
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-container">
+        <div class="logo">🖥️ Screen Test Master</div>
+        <div class="nav-links">
+            <a id="navTool" href="index.html">Tool</a>
+            <a id="navTutorial" href="tutorial.html">Tutorial</a>
+            <a id="navFaq" href="faq.html">FAQ</a>
+            <a id="navChangelog" href="changelog.html" class="active">Changelog</a>
+            <button class="lang-btn" onclick="toggleLanguage()">中文</button>
+        </div>
+    </div>
+</header>
+
+<div class="page-container">
+    <div class="changelog-container" id="changelogContainer"></div>
+</div>
+
+<script>
+const lang = {
+    en: {
+        nav: { tool: "Tool", tutorial: "Tutorial", faq: "FAQ", changelog: "Changelog", langBtn: "中文" },
+        title: "📋 Version History",
+        items: [
+            { version: "v2.1.0 (2025-03-23)", changes: ["Added bilingual support (English/Chinese)", "Unified left/right click switching for all modes in any view", "Improved UI language switching without reload"] },
+            { version: "v2.0.0 (2025-03-23)", changes: ["Unified left/right click switching in fullscreen for all modes", "Added Changelog page", "Optimized prompts"] },
+            { version: "v1.0.0", changes: ["Initial release: dead pixel, brightness, resolution tests", "Fullscreen with double-click and side switching"] }
+        ]
+    },
+    zh: {
+        nav: { tool: "专业检测", tutorial: "使用教程", faq: "常见问题", changelog: "版本日志", langBtn: "English" },
+        title: "📋 版本更新日志",
+        items: [
+            { version: "v2.1.0 (2025-03-23)", changes: ["新增中英文双语支持", "统一所有模式在非全屏下左右单击切换", "优化界面语言切换无需刷新"] },
+            { version: "v2.0.0 (2025-03-23)", changes: ["统一所有模式在全屏下左右单击切换", "新增版本日志页面", "优化提示文字"] },
+            { version: "v1.0.0", changes: ["初始版本：坏点、亮度、分辨率检测", "全屏双击与左右分区切换"] }
+        ]
+    }
+};
+
+let currentLang = localStorage.getItem('lang') === 'zh' ? 'zh' : 'en';
+
+function applyLanguage() {
+    const l = lang[currentLang];
+    document.getElementById('navTool').innerText = l.nav.tool;
+    document.getElementById('navTutorial').innerText = l.nav.tutorial;
+    document.getElementById('navFaq').innerText = l.nav.faq;
+    document.getElementById('navChangelog').innerText = l.nav.changelog;
+    document.querySelector('.lang-btn').innerText = l.nav.langBtn;
+
+    let html = `<h2 style="margin-bottom: 1.5rem;">${l.title}</h2>`;
+    l.items.forEach(item => {
+        let changesHtml = '<ul>';
+        item.changes.forEach(change => { changesHtml += `<li>${change}</li>`; });
+        changesHtml += '</ul>';
+        html += `<div class="changelog-item"><h3>${item.version}</h3>${changesHtml}</div>`;
+    });
+    document.getElementById('changelogContainer').innerHTML = html;
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+}
+
+applyLanguage();
+</script>
+</body>
+</html>

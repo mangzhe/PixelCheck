@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Screen Test Master</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, "Microsoft Yahei", "Segoe UI", sans-serif; }
+        body { background: #f0f2f5; color: #1e293b; line-height: 1.5; }
+        header {
+            background: #ffffffdd; backdrop-filter: blur(8px); padding: 0.8rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .header-container {
+            max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+        .logo {
+            font-size: 1.4rem; font-weight: 700;
+            background: linear-gradient(135deg, #2563eb, #1e40af); -webkit-background-clip: text;
+            background-clip: text; color: transparent;
+        }
+        .nav-links {
+            display: flex; gap: 1.8rem; align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none; color: #334155; font-weight: 500; transition: 0.2s;
+            padding: 0.25rem 0;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #2563eb; border-bottom: 2px solid #2563eb; }
+        .lang-btn {
+            background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 40px;
+            padding: 0.25rem 0.8rem; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
+            margin-left: 1rem;
+        }
+        .lang-btn:hover { background: #e2e8f0; }
+        .page-container {
+            max-width: 1280px; margin: 2rem auto; padding: 0 1.5rem;
+        }
+        .faq-container {
+            background: #fff; border-radius: 28px; padding: 2rem;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+        }
+        .faq-item {
+            background: #f9fafb; border-radius: 20px; padding: 1.5rem;
+            margin-bottom: 1.5rem; border: 1px solid #eef2ff;
+        }
+        .faq-item h3 {
+            color: #0f172a; margin-bottom: 0.75rem;
+        }
+        .faq-item p {
+            color: #475569; line-height: 1.6;
+        }
+        @media (max-width: 768px) {
+            .header-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-container">
+        <div class="logo">🖥️ Screen Test Master</div>
+        <div class="nav-links">
+            <a id="navTool" href="index.html">Tool</a>
+            <a id="navTutorial" href="tutorial.html">Tutorial</a>
+            <a id="navFaq" href="faq.html" class="active">FAQ</a>
+            <a id="navChangelog" href="changelog.html">Changelog</a>
+            <button class="lang-btn" onclick="toggleLanguage()">中文</button>
+        </div>
+    </div>
+</header>
+
+<div class="page-container">
+    <div class="faq-container" id="faqContainer"></div>
+</div>
+
+<script>
+const lang = {
+    en: {
+        nav: { tool: "Tool", tutorial: "Tutorial", faq: "FAQ", changelog: "Changelog", langBtn: "中文" },
+        title: "❓ Frequently Asked Questions",
+        items: [
+            { q: "Why does the screen not display correctly in fullscreen?", a: "Some browsers have limited fullscreen API support. Try Chrome/Edge, or manually press F11." },
+            { q: "Is the test 100% accurate?", a: "This tool is for home use, reference only. For professional diagnosis, use specialized equipment or contact service." },
+            { q: "Mobile device experience?", a: "Use landscape mode, disable auto-brightness, clean screen. Tap left/right side in fullscreen to switch patterns." },
+            { q: "Cursor blinking in fullscreen?", a: "Cursor is hidden in fullscreen mode, no interference." },
+            { q: "Can't exit fullscreen in resolution mode?", a: "Fixed. Double-click works in all modes now." },
+            { q: "Does click switching work outside fullscreen?", a: "Yes! All modes now support left/right click to switch previous/next even in normal view." }
+        ]
+    },
+    zh: {
+        nav: { tool: "专业检测", tutorial: "使用教程", faq: "常见问题", changelog: "版本日志", langBtn: "English" },
+        title: "❓ 常见问题解答",
+        items: [
+            { q: "为什么全屏后画面显示不全？", a: "部分浏览器对全屏API支持有限，建议使用Chrome/Edge，或手动按F11全屏。" },
+            { q: "检测结果100%准确吗？", a: "本工具为家用级检测，仅供参考；专业诊断请用专业设备或联系售后。" },
+            { q: "手机端怎么用？", a: "建议横屏，关闭自动亮度，清洁屏幕。全屏下轻触左侧/右侧区域切换测试图。" },
+            { q: "全屏时左上角光标闪烁？", a: "全屏时已隐藏光标，无干扰。" },
+            { q: "分辨率检测模式下无法退出全屏？", a: "已修复，所有模式双击均可正常进入/退出全屏。" },
+            { q: "非全屏下可以点击切换吗？", a: "可以！所有模式在非全屏下也支持单击屏幕左/右半区切换上一张/下一张。" }
+        ]
+    }
+};
+
+let currentLang = localStorage.getItem('lang') === 'zh' ? 'zh' : 'en';
+
+function applyLanguage() {
+    const l = lang[currentLang];
+    document.getElementById('navTool').innerText = l.nav.tool;
+    document.getElementById('navTutorial').innerText = l.nav.tutorial;
+    document.getElementById('navFaq').innerText = l.nav.faq;
+    document.getElementById('navChangelog').innerText = l.nav.changelog;
+    document.querySelector('.lang-btn').innerText = l.nav.langBtn;
+
+    let html = `<h2 style="margin-bottom: 1.5rem;">${l.title}</h2>`;
+    l.items.forEach(item => {
+        html += `<div class="faq-item"><h3>${item.q}</h3><p>${item.a}</p></div>`;
+    });
+    document.getElementById('faqContainer').innerHTML = html;
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+}
+
+applyLanguage();
+</script>
+</body>
+</html>

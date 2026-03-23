@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Screen Test Master - 屏幕检测大师</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, "Microsoft Yahei", "Segoe UI", sans-serif; }
+        body { background: #f0f2f5; color: #1e293b; line-height: 1.5; caret-color: transparent; }
+        *:focus { outline: none; }
+        header {
+            background: #ffffffdd; backdrop-filter: blur(8px); padding: 0.8rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .header-container {
+            max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+        .logo {
+            font-size: 1.4rem; font-weight: 700;
+            background: linear-gradient(135deg, #2563eb, #1e40af); -webkit-background-clip: text;
+            background-clip: text; color: transparent;
+        }
+        .nav-links {
+            display: flex; gap: 1.8rem; align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none; color: #334155; font-weight: 500; transition: 0.2s;
+            cursor: pointer; padding: 0.25rem 0;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #2563eb; border-bottom: 2px solid #2563eb; }
+        .lang-btn {
+            background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 40px;
+            padding: 0.25rem 0.8rem; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
+            margin-left: 1rem;
+        }
+        .lang-btn:hover { background: #e2e8f0; }
+        .page-container {
+            max-width: 1280px; margin: 2rem auto; padding: 0 1.5rem;
+        }
+        .tool-layout {
+            display: flex; flex-wrap: wrap; gap: 2rem;
+        }
+        .feature-cards {
+            flex: 1; min-width: 260px;
+        }
+        .card {
+            background: #fff; border-radius: 20px; padding: 1.5rem; margin-bottom: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer; transition: all 0.2s ease; border: 1px solid #eef2ff;
+        }
+        .card:hover { transform: translateY(-3px); border-color: #cbd5e1; box-shadow: 0 12px 24px -12px rgba(0,0,0,0.1); }
+        .card h3 { color: #0f172a; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem; }
+        .card p { color: #475569; font-size: 0.9rem; }
+        .detect-area {
+            flex: 2.5; min-width: 320px; background: #fff; border-radius: 28px; padding: 1.5rem;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;
+        }
+        .detect-screen {
+            width: 100%; height: 360px; background: #000; margin-bottom: 1.5rem; border-radius: 20px;
+            position: relative; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .detect-controls {
+            display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; justify-content: center;
+        }
+        .btn {
+            padding: 0.5rem 1.2rem; border: none; border-radius: 40px; background: #f1f5f9;
+            color: #1e293b; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.85rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-outline { background: transparent; border: 1px solid #cbd5e1; }
+        .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+        .btn-group {
+            display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; justify-content: center;
+        }
+        .detect-tips {
+            background: #f8fafc; padding: 0.75rem 1rem; border-radius: 60px; font-size: 0.85rem;
+            color: #334155; text-align: center; margin: 0.5rem 0;
+        }
+        .judge-guide {
+            background: #eef2ff; border-left: 4px solid #2563eb; padding: 0.75rem 1rem;
+            border-radius: 16px; font-size: 0.85rem; margin-top: 0.5rem; width: 100%; text-align: left;
+            color: #1e293b;
+        }
+        @media (max-width: 768px) {
+            .detect-screen { height: 260px; }
+            .btn { padding: 0.4rem 1rem; }
+            .header-container { flex-direction: column; }
+        }
+        .detect-screen:-webkit-full-screen { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; }
+        .detect-screen:fullscreen { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; }
+        canvas { display: block; width: 100%; height: 100%; pointer-events: auto; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-container">
+        <div class="logo">🖥️ Screen Test Master</div>
+        <div class="nav-links">
+            <a id="navTool" href="index.html" class="active">Tool</a>
+            <a id="navTutorial" href="tutorial.html">Tutorial</a>
+            <a id="navFaq" href="faq.html">FAQ</a>
+            <a id="navChangelog" href="changelog.html">Changelog</a>
+            <button class="lang-btn" onclick="toggleLanguage()">中文</button>
+        </div>
+    </div>
+</header>
+
+<div class="page-container">
+    <div class="tool-layout">
+        <div class="feature-cards">
+            <div class="card" onclick="switchDetect('deadpixel')">
+                <h3>🔍 <span id="cardDeadTitle">Dead Pixel Test</span></h3>
+                <p id="cardDeadDesc">Full solid colors, quickly find bright/dark spots</p>
+            </div>
+            <div class="card" onclick="switchDetect('brightness')">
+                <h3>💡 <span id="cardBrightTitle">Brightness/Contrast Test</span></h3>
+                <p id="cardBrightDesc">Grayscale, checkerboard, stripes – evaluate uniformity & contrast</p>
+            </div>
+            <div class="card" onclick="switchDetect('resolution')">
+                <h3>📐 <span id="cardResTitle">Resolution Test</span></h3>
+                <p id="cardResDesc">Grid, target, text – check scaling, blur, distortion</p>
+            </div>
+        </div>
+
+        <div class="detect-area">
+            <div class="detect-screen" id="detectScreen"></div>
+            <div class="detect-controls">
+                <button class="btn btn-success" id="fullscreenBtn" onclick="toggleFullscreen()">🖥️ Fullscreen</button>
+                <button class="btn btn-danger" id="resetBtn" onclick="resetDetect()">⟳ Reset</button>
+            </div>
+            <div id="dynamicToolbar" style="width:100%"></div>
+            <div class="detect-tips" id="detectTips">✨ Click left card to select test mode, click left/right side of screen to switch</div>
+            <div class="judge-guide" id="judgeGuide">
+                📖 <strong id="judgeTitle">Evaluation Criteria</strong><br>
+                <span id="judgeContent">Select a test mode first</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== LANGUAGE PACK ==========
+const lang = {
+    en: {
+        nav: { tool: "Tool", tutorial: "Tutorial", faq: "FAQ", changelog: "Changelog", langBtn: "中文" },
+        cardDeadTitle: "🔍 Dead Pixel Test", cardDeadDesc: "Full solid colors, quickly find bright/dark spots",
+        cardBrightTitle: "💡 Brightness/Contrast Test", cardBrightDesc: "Grayscale, checkerboard, stripes – evaluate uniformity & contrast",
+        cardResTitle: "📐 Resolution Test", cardResDesc: "Grid, target, text – check scaling, blur, distortion",
+        fullscreenBtn: "🖥️ Fullscreen", resetBtn: "⟳ Reset",
+        defaultTip: "✨ Click left card to select test mode, click left/right side of screen to switch",
+        judgeTitle: "Evaluation Criteria", judgeDefault: "Select a test mode first",
+        colorNames: ["Black", "White", "Red", "Green", "Blue", "Yellow", "Cyan", "Magenta"],
+        colorGuides: [
+            "Check for any bright/white pixels (bright spots)",
+            "Check for any dark or discolored pixels",
+            "Check for dark spots, blue or green spots",
+            "Check for dark spots, red or blue spots",
+            "Check for dark spots, red or green spots",
+            "Check for dark spots or other color abnormalities",
+            "Check for dark spots or missing colors",
+            "Check for dark spots or uneven colors"
+        ],
+        brightnessModes: [
+            "0% Gray (Pure Black)", "10% Gray", "25% Gray", "50% Gray", "75% Gray", "100% Gray (Pure White)",
+            "Checkerboard", "Vertical Stripes", "Smooth Gradient"
+        ],
+        brightnessGuides: [
+            "Check for backlight bleed, white spots, or uneven brightness",
+            "Check brightness uniformity in very dark scenes",
+            "Check uniformity and shadow details",
+            "Standard gray: check overall uniformity, no dirty screen effect",
+            "High brightness: check evenness, no color shift",
+            "Pure white: check uniformity, no yellowing or dark areas",
+            "Check contrast sharpness, edges should be crisp, no ghosting",
+            "Check stripe edges sharpness, response time and contrast performance",
+            "Check color transitions, no visible banding"
+        ],
+        resolutionModes: ["Grid Test", "Radial Target", "Text Clarity"],
+        resolutionGuides: [
+            "Grid lines should be straight, no distortion, sharp edges",
+            "Radial lines from center to edge should be clear, no blur, center sharp",
+            "Text edges should be sharp, no ghosting, aliasing, or blur"
+        ]
+    },
+    zh: {
+        nav: { tool: "专业检测", tutorial: "使用教程", faq: "常见问题", changelog: "版本日志", langBtn: "English" },
+        cardDeadTitle: "🔍 坏点检测", cardDeadDesc: "纯色背景全覆盖，快速找出亮点/暗点/彩点",
+        cardBrightTitle: "💡 亮度/对比度检测", cardBrightDesc: "灰度级+棋盘格+条纹，精准评估亮度均匀性及对比表现",
+        cardResTitle: "📐 分辨率检测", cardResDesc: "网格/标靶/清晰度文字，检测拉伸、模糊、缩放异常",
+        fullscreenBtn: "🖥️ 全屏检测", resetBtn: "⟳ 重置检测",
+        defaultTip: "✨ 请点击左侧卡片选择检测类型，单击画面左/右半区切换上一张/下一张",
+        judgeTitle: "判断标准", judgeDefault: "待选择检测模式后显示详细说明",
+        colorNames: ["黑色", "白色", "红色", "绿色", "蓝色", "黄色", "青色", "紫色"],
+        colorGuides: [
+            "观察是否有发亮/发白的像素点（亮点）",
+            "观察是否有不发光的暗点或偏色点",
+            "观察是否有暗点、蓝点或绿点",
+            "观察是否有暗点、红点或蓝点",
+            "观察是否有暗点、红点或绿点",
+            "观察是否有暗点或其他颜色异常",
+            "观察是否有暗点或色彩缺失",
+            "观察是否有暗点或色彩不均"
+        ],
+        brightnessModes: [
+            "0% 灰度 (纯黑)", "10% 灰度", "25% 灰度", "50% 灰度", "75% 灰度", "100% 灰度 (纯白)",
+            "黑白棋盘格", "黑白竖条纹", "平滑渐变"
+        ],
+        brightnessGuides: [
+            "全黑下观察屏幕是否有漏光、白斑或亮度不均",
+            "极暗场景下检查亮度均匀性，有无局部过亮区域",
+            "中低亮度下观察亮度一致性及暗部细节",
+            "标准灰度，检查整体亮度均匀性，有无脏屏感",
+            "高亮度区域，检查亮度是否均匀，有无偏色",
+            "纯白下检查亮度一致性，有无发黄或发暗区域",
+            "检查对比度锐度，格子边缘应清晰无拖影，无串色",
+            "观察条纹边界是否锐利，用于检测响应时间及对比度表现",
+            "检查色彩过渡是否平滑，有无明显色阶断层"
+        ],
+        resolutionModes: ["网格测试", "放射标靶", "文字清晰度"],
+        resolutionGuides: [
+            "网格线应横平竖直，无弯曲变形，线条清晰锐利",
+            "中心到边缘的放射线应清晰无模糊，圆心锐利，无重影",
+            "不同大小文字边缘应清晰无虚影，无锯齿或模糊"
+        ]
+    }
+};
+
+let currentLang = localStorage.getItem('lang') === 'zh' ? 'zh' : 'en';
+
+function applyLanguage() {
+    const l = lang[currentLang];
+    // 更新导航链接
+    document.getElementById('navTool').innerText = l.nav.tool;
+    document.getElementById('navTutorial').innerText = l.nav.tutorial;
+    document.getElementById('navFaq').innerText = l.nav.faq;
+    document.getElementById('navChangelog').innerText = l.nav.changelog;
+    document.querySelector('.lang-btn').innerText = l.nav.langBtn;
+    // 更新卡片内容
+    document.getElementById('cardDeadTitle').innerHTML = l.cardDeadTitle;
+    document.getElementById('cardDeadDesc').innerText = l.cardDeadDesc;
+    document.getElementById('cardBrightTitle').innerHTML = l.cardBrightTitle;
+    document.getElementById('cardBrightDesc').innerText = l.cardBrightDesc;
+    document.getElementById('cardResTitle').innerHTML = l.cardResTitle;
+    document.getElementById('cardResDesc').innerText = l.cardResDesc;
+    // 更新按钮
+    document.getElementById('fullscreenBtn').innerHTML = l.fullscreenBtn;
+    document.getElementById('resetBtn').innerHTML = l.resetBtn;
+    // 更新提示和判断标准标题
+    document.getElementById('detectTips').innerHTML = l.defaultTip;
+    document.getElementById('judgeTitle').innerText = l.judgeTitle;
+    document.getElementById('judgeContent').innerText = l.judgeDefault;
+    // 刷新动态工具栏和当前视图
+    if (currentDetect === 'deadpixel') buildDeadPixelToolbar();
+    else if (currentDetect === 'brightness') buildBrightnessToolbar();
+    else if (currentDetect === 'resolution') buildResolutionToolbar();
+    updateDynamicTipAndJudge();
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+}
+
+// ========== DETECT ENGINE (保持不变) ==========
+let currentDetect = 'deadpixel';
+const detectScreen = document.getElementById('detectScreen');
+const detectTips = document.getElementById('detectTips');
+const judgeGuide = document.getElementById('judgeGuide');
+
+const colorValues = [
+    { hex: '#000000' }, { hex: '#ffffff' }, { hex: '#ff0000' }, { hex: '#00ff00' },
+    { hex: '#0000ff' }, { hex: '#ffff00' }, { hex: '#00ffff' }, { hex: '#ff00ff' }
+];
+let currentColorIndex = 0;
+
+const brightnessRenderers = [
+    () => renderGrayLevel(0), () => renderGrayLevel(10), () => renderGrayLevel(25),
+    () => renderGrayLevel(50), () => renderGrayLevel(75), () => renderGrayLevel(100),
+    () => renderCheckerboard(), () => renderStripes(), () => renderGradient()
+];
+let currentBrightnessIndex = 0;
+
+const resolutionRenderers = [
+    () => renderResolutionGrid(), () => renderResolutionTarget(), () => renderResolutionText()
+];
+let currentResolutionIndex = 0;
+
+function clearScreen() {
+    detectScreen.innerHTML = '';
+    detectScreen.style.backgroundColor = '';
+    detectScreen.style.background = '';
+}
+function renderGrayLevel(levelPercent) {
+    clearScreen();
+    const intensity = Math.floor(255 * (levelPercent / 100));
+    detectScreen.style.backgroundColor = `rgb(${intensity}, ${intensity}, ${intensity})`;
+}
+function createResponsiveCanvas(drawCallback) {
+    const canvas = document.createElement('canvas');
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    canvas.style.pointerEvents = 'auto';
+    const ctx = canvas.getContext('2d');
+    const performDraw = () => {
+        const rect = detectScreen.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        drawCallback(ctx, canvas.width, canvas.height);
+    };
+    performDraw();
+    const ro = new ResizeObserver(() => performDraw());
+    ro.observe(detectScreen);
+    canvas.addEventListener('destroy', () => ro.disconnect());
+    canvas.addEventListener('dblclick', (e) => { e.stopPropagation(); toggleFullscreen(); });
+    return canvas;
+}
+function renderCheckerboard() {
+    clearScreen();
+    const canvas = createResponsiveCanvas((ctx, w, h) => {
+        const cellSize = Math.max(30, Math.min(w, h) / 12);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#222222';
+        for (let i = 0; i < w + cellSize; i += cellSize) {
+            for (let j = 0; j < h + cellSize; j += cellSize) {
+                if ((Math.floor(i / cellSize) + Math.floor(j / cellSize)) % 2 === 0) {
+                    ctx.fillRect(i, j, cellSize, cellSize);
+                }
+            }
+        }
+    });
+    detectScreen.appendChild(canvas);
+}
+function renderStripes() {
+    clearScreen();
+    const canvas = createResponsiveCanvas((ctx, w, h) => {
+        const stripeWidth = Math.max(20, w / 20);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#000000';
+        for (let x = 0; x < w; x += stripeWidth * 2) {
+            ctx.fillRect(x, 0, stripeWidth, h);
+        }
+    });
+    detectScreen.appendChild(canvas);
+}
+function renderGradient() {
+    clearScreen();
+    const canvas = createResponsiveCanvas((ctx, w, h) => {
+        const grad = ctx.createLinearGradient(0, 0, w, 0);
+        grad.addColorStop(0, '#000000');
+        grad.addColorStop(0.5, '#808080');
+        grad.addColorStop(1, '#ffffff');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+    });
+    detectScreen.appendChild(canvas);
+}
+function renderResolutionGrid() {
+    clearScreen();
+    const canvas = createResponsiveCanvas((ctx, w, h) => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        const stepX = w / 12;
+        const stepY = h / 12;
+        for (let x = stepX; x < w; x += stepX) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, h);
+            ctx.stroke();
+        }
+        for (let y = stepY; y < h; y += stepY) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+            ctx.stroke();
+        }
+        const margin = Math.max(20, w * 0.05);
+        let fontSize = Math.max(14, Math.min(28, w / 25));
+        ctx.fillStyle = '#1e293b';
+        ctx.font = `${fontSize}px "Segoe UI"`;
+        let titleText = currentLang === 'en' ? "Resolution Grid Test" : "分辨率网格测试";
+        let titleWidth = ctx.measureText(titleText).width;
+        if (titleWidth > w - margin * 2) {
+            fontSize = fontSize * 0.8;
+            ctx.font = `${fontSize}px "Segoe UI"`;
+            titleWidth = ctx.measureText(titleText).width;
+        }
+        ctx.fillText(titleText, margin, margin + fontSize);
+        ctx.font = `14px monospace`;
+        ctx.fillStyle = '#2563eb';
+        const infoText = `${Math.round(w)} x ${Math.round(h)} px`;
+        ctx.fillText(infoText, margin, margin + fontSize + 22);
+    });
+    detectScreen.appendChild(canvas);
+}
+function renderResolutionTarget() {
+    clearScreen();
+    const canvas = createResponsiveCanvas((ctx, w, h) => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        const centerX = w / 2;
+        const centerY = h / 2;
+        const maxRadius = Math.min(w, h) * 0.42;
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.2;
+        for (let r = maxRadius; r >= 5; r -= maxRadius / 8) {
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, r, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+        for (let ang = 0; ang < 360; ang += 15) {
+            let rad = ang * Math.PI / 180;
+            let x1 = centerX + Math.cos(rad) * 5;
+            let y1 = centerY + Math.sin(rad) * 5;
+            let x2 = centerX + Math.cos(rad) * maxRadius;
+            let y2 = centerY + Math.sin(rad) * maxRadius;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+        const titleSize = Math.max(14, Math.min(24, w / 28));
+        ctx.font = `bold ${titleSize}px "Segoe UI"`;
+        const titleText = currentLang === 'en' ? "⚡ Radial Target" : "⚡ 放射标靶";
+        const titleWidth = ctx.measureText(titleText).width;
+        let titleX = centerX - titleWidth / 2;
+        let titleY = centerY - maxRadius - 12;
+        if (titleY < 20) titleY = 20;
+        ctx.fillStyle = '#dc2626';
+        ctx.fillText(titleText, titleX, titleY);
+        const subSize = Math.max(10, Math.min(16, w / 40));
+        ctx.font = `${subSize}px monospace`;
+        const subText = currentLang === 'en' ? "Center to edge sharpness test" : "中心到边缘线条清晰度检测";
+        const subWidth = ctx.measureText(subText).width;
+        let subX = centerX - subWidth / 2;
+        let subY = centerY + maxRadius + 20;
+        if (subY > h - 15) subY = h - 15;
+        ctx.fillStyle = '#0f172a';
+        ctx.fillText(subText, subX, subY);
+    });
+    detectScreen.appendChild(canvas);
+}
+function renderResolutionText() {
+    clearScreen();
+    const canvas = createResponsiveCanvas((ctx, w, h) => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#0f172a';
+        const sizes = [12, 16, 20, 28, 36];
+        let yPos = 35;
+        ctx.font = `14px "Segoe UI"`;
+        ctx.fillStyle = '#475569';
+        const title = currentLang === 'en' ? "Text Clarity Test (Scaling/Blur)" : "文字清晰度测试 (缩放/模糊检测)";
+        ctx.fillText(title, 20, yPos);
+        yPos += 30;
+        for (let sz of sizes) {
+            ctx.font = `${sz}px "Microsoft Yahei", "Segoe UI"`;
+            ctx.fillStyle = '#000000';
+            let text = currentLang === 'en' ? `Font size ${sz}px — screen resolution test sharp edges` : `字体大小 ${sz}px — 屏幕分辨率检测 清晰边缘`;
+            if (ctx.measureText(text).width > w - 40) {
+                text = currentLang === 'en' ? `${sz}px — sharpness test` : `${sz}px — 清晰度测试`;
+            }
+            ctx.fillText(text, 20, yPos);
+            yPos += sz + 12;
+            if (yPos > h - 50) break;
+        }
+        ctx.font = `16px monospace`;
+        ctx.fillStyle = '#2563eb';
+        ctx.fillText(`Viewport: ${Math.round(w)}×${Math.round(h)}  | DPR: ${window.devicePixelRatio.toFixed(2)}`, 20, yPos + 10);
+    });
+    detectScreen.appendChild(canvas);
+}
+
+function refreshCurrentView() {
+    if (currentDetect === 'deadpixel') applyColorByIndex(currentColorIndex);
+    else if (currentDetect === 'brightness') brightnessRenderers[currentBrightnessIndex]();
+    else if (currentDetect === 'resolution') resolutionRenderers[currentResolutionIndex]();
+}
+function applyColorByIndex(index) {
+    clearScreen();
+    detectScreen.style.backgroundColor = colorValues[index].hex;
+    updateDynamicTipAndJudge();
+}
+function nextDeadPixel() { currentColorIndex = (currentColorIndex + 1) % colorValues.length; applyColorByIndex(currentColorIndex); }
+function prevDeadPixel() { currentColorIndex = (currentColorIndex - 1 + colorValues.length) % colorValues.length; applyColorByIndex(currentColorIndex); }
+function nextBrightness() { currentBrightnessIndex = (currentBrightnessIndex + 1) % brightnessRenderers.length; brightnessRenderers[currentBrightnessIndex](); updateDynamicTipAndJudge(); }
+function prevBrightness() { currentBrightnessIndex = (currentBrightnessIndex - 1 + brightnessRenderers.length) % brightnessRenderers.length; brightnessRenderers[currentBrightnessIndex](); updateDynamicTipAndJudge(); }
+function nextResolution() { currentResolutionIndex = (currentResolutionIndex + 1) % resolutionRenderers.length; resolutionRenderers[currentResolutionIndex](); updateDynamicTipAndJudge(); }
+function prevResolution() { currentResolutionIndex = (currentResolutionIndex - 1 + resolutionRenderers.length) % resolutionRenderers.length; resolutionRenderers[currentResolutionIndex](); updateDynamicTipAndJudge(); }
+
+function updateDynamicTipAndJudge() {
+    const l = lang[currentLang];
+    if (currentDetect === 'deadpixel') {
+        detectTips.innerHTML = `🎨 ${l.cardDeadTitle.split(' ')[1]} - ${l.colorNames[currentColorIndex]} (${currentColorIndex+1}/${colorValues.length}). ${l.defaultTip.split('，')[1] || 'Click left/right to switch'}`;
+        judgeGuide.innerHTML = `<strong>📖 ${l.judgeTitle}:</strong><br>${l.colorGuides[currentColorIndex]}<br>⚠️ ${currentLang === 'en' ? 'Fixed bright/dark/colored pixel = dead pixel.' : '若像素点颜色固定不变或始终不亮，即为坏点。'}`;
+    } else if (currentDetect === 'brightness') {
+        detectTips.innerHTML = `💡 ${l.brightnessModes[currentBrightnessIndex]} (${currentBrightnessIndex+1}/${brightnessRenderers.length}). ${l.defaultTip.split('，')[1] || 'Click left/right to switch'}`;
+        judgeGuide.innerHTML = `<strong>📖 ${l.judgeTitle}:</strong><br>${l.brightnessGuides[currentBrightnessIndex]}`;
+    } else if (currentDetect === 'resolution') {
+        detectTips.innerHTML = `📏 ${l.resolutionModes[currentResolutionIndex]} (${currentResolutionIndex+1}/${resolutionRenderers.length}). ${l.defaultTip.split('，')[1] || 'Click left/right to switch'}`;
+        judgeGuide.innerHTML = `<strong>📖 ${l.judgeTitle}:</strong><br>${l.resolutionGuides[currentResolutionIndex]}`;
+    }
+}
+
+function switchDetect(type) {
+    currentDetect = type;
+    if (type === 'deadpixel') {
+        currentColorIndex = 0;
+        applyColorByIndex(0);
+        buildDeadPixelToolbar();
+    } else if (type === 'brightness') {
+        currentBrightnessIndex = 0;
+        brightnessRenderers[0]();
+        buildBrightnessToolbar();
+    } else if (type === 'resolution') {
+        currentResolutionIndex = 0;
+        resolutionRenderers[0]();
+        buildResolutionToolbar();
+    }
+    updateDynamicTipAndJudge();
+}
+
+function buildDeadPixelToolbar() {
+    const l = lang[currentLang];
+    let html = `<div class="btn-group" style="margin-top:6px;">`;
+    colorValues.forEach((_, idx) => {
+        html += `<button class="btn btn-outline" onclick="jumpToColor(${idx})">${l.colorNames[idx]}</button>`;
+    });
+    html += `</div><div class="detect-tips" style="margin-top:6px;">🎨 ${currentLang === 'en' ? 'Click color buttons, or left/right side of screen to switch' : '单击颜色按钮切换，单击画面左/右半区切换上一张/下一张'}</div>`;
+    dynamicToolbar.innerHTML = html;
+}
+function buildBrightnessToolbar() {
+    const l = lang[currentLang];
+    let html = `<div class="btn-group"><span style="font-size:0.8rem;">✨ ${currentLang === 'en' ? 'Brightness/Contrast Options:' : '亮度对比度选项：'}</span>`;
+    brightnessRenderers.forEach((_, idx) => {
+        html += `<button class="btn btn-outline" onclick="jumpToBrightness(${idx})">${l.brightnessModes[idx]}</button>`;
+    });
+    html += `</div><div class="detect-tips">💡 ${currentLang === 'en' ? 'Click left/right side of screen to switch' : '单击画面左/右半区切换上一张/下一张，观察亮度均匀性/对比度锐度'}</div>`;
+    dynamicToolbar.innerHTML = html;
+}
+function buildResolutionToolbar() {
+    const l = lang[currentLang];
+    let html = `<div class="btn-group">`;
+    resolutionRenderers.forEach((_, idx) => {
+        html += `<button class="btn btn-primary" onclick="jumpToResolution(${idx})">${l.resolutionModes[idx]}</button>`;
+    });
+    html += `</div><div class="detect-tips">🖥️ ${currentLang === 'en' ? 'Click left/right side of screen to switch patterns' : '单击画面左/右半区切换不同测试图，观察线条/文字是否清晰'}</div>`;
+    dynamicToolbar.innerHTML = html;
+}
+window.jumpToColor = (idx) => { if (currentDetect === 'deadpixel') { currentColorIndex = idx; applyColorByIndex(idx); } };
+window.jumpToBrightness = (idx) => { if (currentDetect === 'brightness') { currentBrightnessIndex = idx; brightnessRenderers[idx](); updateDynamicTipAndJudge(); } };
+window.jumpToResolution = (idx) => { if (currentDetect === 'resolution') { currentResolutionIndex = idx; resolutionRenderers[idx](); updateDynamicTipAndJudge(); } };
+
+function toggleFullscreen() {
+    const elem = detectScreen;
+    const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (!isFullscreen) {
+        const req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.mozRequestFullScreen || elem.msRequestFullscreen;
+        if (req) req.call(elem).catch(e => console.warn(e));
+        setTimeout(() => { document.activeElement?.blur(); document.body.style.caretColor = 'transparent'; }, 50);
+    } else {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        if (exit) exit.call(document);
+        document.body.style.caretColor = '';
+    }
+}
+function resetDetect() {
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    refreshCurrentView();
+    updateDynamicTipAndJudge();
+    document.body.style.caretColor = '';
+}
+
+function handleScreenClick(e) {
+    if (e.target.closest('.btn') || e.target.closest('.card')) return;
+    const rect = detectScreen.getBoundingClientRect();
+    const isLeftHalf = (e.clientX - rect.left) < rect.width / 2;
+    if (currentDetect === 'deadpixel') isLeftHalf ? prevDeadPixel() : nextDeadPixel();
+    else if (currentDetect === 'brightness') isLeftHalf ? prevBrightness() : nextBrightness();
+    else if (currentDetect === 'resolution') isLeftHalf ? prevResolution() : nextResolution();
+}
+function handleScreenDoubleClick(e) { if (e.target.closest('.btn')) return; toggleFullscreen(); }
+
+detectScreen.addEventListener('click', handleScreenClick);
+detectScreen.addEventListener('dblclick', handleScreenDoubleClick);
+document.addEventListener('fullscreenchange', () => { setTimeout(refreshCurrentView, 30); });
+
+switchDetect('deadpixel');
+applyLanguage();
+</script>
+</body>
+</html>
